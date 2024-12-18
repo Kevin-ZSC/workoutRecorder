@@ -1,25 +1,20 @@
 import { MongoClient } from "mongodb";
 
-// Use MongoDB URI based on the environment
-const mongoURI =
-  process.env.NODE_ENV === "production" ? process.env.MONGODB_URI : "mongodb://localhost:27017";
-
-const client = new MongoClient(mongoURI);
+// Your MongoDB connection URI (this is for local development, adjust if using a different setup)
+const MONGODB_URI = process.env.MONGODB_URI;
+const client = new MongoClient(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 let clientPromise;
 
 if (process.env.NODE_ENV === "development") {
-  // In development, use a global variable so the MongoClient is not constantly re-instantiated
-  if (global._mongoClientPromise) {
-    clientPromise = global._mongoClientPromise;
-  } else {
-    global._mongoClientPromise = client.connect();
-    clientPromise = global._mongoClientPromise;
-  }
+  // In development mode, use the MongoClient singleton
+  clientPromise = globalThis.mongoClient ??= client.connect();
 } else {
-  // In production, it's safe to create a new MongoClient for each request
+  // In production mode, always create a new connection
   clientPromise = client.connect();
 }
 
 export default clientPromise;
-
