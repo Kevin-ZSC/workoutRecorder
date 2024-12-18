@@ -85,39 +85,30 @@ export default function AddPlanForm() {
   };
 
   const handleAddPlans = async (e: React.FormEvent) => {
-    e.preventDefault();
-  
-    // Save the current workout exercises to the state
-    setPlan(workoutExercises);
-  
+    e.preventDefault(); 
+    setPlan(workoutExercises); 
+
     try {
-      // Send a POST request to the API
       const response = await fetch('/api/addplans', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          planData: workoutExercises,
-          planCompleted: false,
+          planData:workoutExercises,
+          planCompleted:false,
         }),
       });
-  
+
       if (!response.ok) {
-        const errorDetails = await response.json();
-        throw new Error(errorDetails.message || 'Failed to save workout data to MongoDB');
+        throw new Error('Failed to save workout data to MongoDB');
       }
-  
-      // Log success
-      console.log('Plan added:', workoutExercises);
-  
-      // Redirect to the "show plans" page
-      router.push('/showplans');
     } catch (error) {
       console.error('Error saving data to database:', error);
     }
+    router.push('/showplans');
+    console.log("Plan added:", workoutExercises);
   };
-  
 
   return (
     <div className="flex justify-center  bg-gray-50">
