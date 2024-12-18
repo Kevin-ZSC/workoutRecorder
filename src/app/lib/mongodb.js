@@ -1,20 +1,14 @@
-import { MongoClient } from "mongodb";
+import { MongoClient } from 'mongodb';
 
-// Your MongoDB connection URI (this is for local development, adjust if using a different setup)
-const MONGODB_URI = process.env.MONGODB_URI;
-const client = new MongoClient(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const mongoURI = process.env.MONGODB_URI;
+const client = new MongoClient(mongoURI); 
 
 let clientPromise;
 
-if (process.env.NODE_ENV === "development") {
-  // In development mode, use the MongoClient singleton
-  clientPromise = globalThis.mongoClient ??= client.connect();
-} else {
-  // In production mode, always create a new connection
-  clientPromise = client.connect();
+if (!global._mongoClientPromise) {
+  global._mongoClientPromise = client.connect();
 }
+clientPromise = global._mongoClientPromise;
 
 export default clientPromise;
+
