@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
 import Navbar from "../components/Navbar";
 
 type CompletedExercise = {
@@ -17,9 +19,15 @@ type RecordData = {
   _id: string;
 };
 
-
 const RecordPage = () => {
   const [completedData, setCompletedData] = useState<RecordData[]>([]);
+  const router = useRouter();
+   useEffect(() => {
+      const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+      if (!isLoggedIn) {
+        router.push("/login");
+      }
+    }, []);
   
   // Fetch workout data from the database via the API
   useEffect(() => {

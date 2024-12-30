@@ -39,6 +39,13 @@ export default function PlanInDetail() {
     fetchWorkoutData();
   }, []);
 
+   useEffect(() => {
+      const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+      if (!isLoggedIn) {
+        router.push("/login");
+      }
+    }, []);
+
   const handleDelete = async (index: number) => {
     
     const planToDelete = plans[index];

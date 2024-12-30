@@ -7,7 +7,6 @@ type Props = {
     addExercise: (workoutType: string, exercise: ExerciseDetails) => void;
     updateExercise: (workoutType: string, index: number, updatedExercise: ExerciseDetails) => void;
     deleteExercise: (workoutType: string, index: number) => void;
-    
 };
 
 export default function ExerciseList({
@@ -16,17 +15,60 @@ export default function ExerciseList({
     addExercise,
     updateExercise,
     deleteExercise,
-    
 }: Props) {
     const [editIndex, setEditIndex] = useState<{ workoutType: string; index: number } | null>(null);
     const [editForm, setEditForm] = useState<ExerciseDetails | null>(null);
+    const [formErrors, setFormErrors] = useState<string[]>([]); // To store validation errors
 
+    const validateExerciseForm = (exercise: ExerciseDetails) => {
+        const errors: string[] = [];
+        if (!exercise.name.trim()) {
+            errors.push("Exercise name is required.");
+        }
+        if (exercise.sets <= 0) {
+            errors.push("Sets must be a positive number.");
+        }
+        if (exercise.reps <= 0) {
+            errors.push("Reps must be a positive number.");
+        }
+        if (exercise.weight <= 0) {
+            errors.push("Weight must be a positive number.");
+        }
+        return errors;
+    };
 
-    
+    const handleAddExercise = (workoutType: string, exercise: ExerciseDetails) => {
+        const errors = validateExerciseForm(exercise);
+        if (errors.length > 0) {
+            setFormErrors(errors);
+            return;
+        }
+        addExercise(workoutType, exercise);
+        setFormErrors([]); // Clear errors after successful submission
+    };
+
+    const handleUpdateExercise = (workoutType: string, index: number, exercise: ExerciseDetails) => {
+        const errors = validateExerciseForm(exercise);
+        if (errors.length > 0) {
+            setFormErrors(errors);
+            return;
+        }
+        updateExercise(workoutType, index, exercise);
+        setFormErrors([]); // Clear errors after successful update
+    };
 
     return (
         <div className="mt-6">
             <h1 className="text-xl font-bold mb-6 text-center">Workout Plan for {formData.date}</h1>
+            {formErrors.length > 0 && (
+                <div className="bg-red-100 text-red-600 p-4 mb-4 rounded-md">
+                    <ul>
+                        {formErrors.map((error, index) => (
+                            <li key={index}>{error}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
             {workoutExercises.map((workout, workoutIndex) => (
                 <div key={workoutIndex} className="p-4 border border-gray-300 rounded-md shadow-sm mb-4">
                     <h2 className="text-lg font-semibold mb-2">{workout.workoutType} Exercises</h2>
@@ -39,11 +81,7 @@ export default function ExerciseList({
                                         onSubmit={(e) => {
                                             e.preventDefault();
                                             if (editForm) {
-                                                updateExercise(
-                                                    workout.workoutType,
-                                                    exerciseIndex,
-                                                    editForm
-                                                );
+                                                handleUpdateExercise(workout.workoutType, exerciseIndex, editForm);
                                                 setEditIndex(null);
                                                 setEditForm(null);
                                             }
@@ -147,28 +185,25 @@ export default function ExerciseList({
                             const repsInput = form.elements.namedItem("reps") as HTMLInputElement;
                             const weightInput = form.elements.namedItem("weight") as HTMLInputElement;
 
-                            if (nameInput.value.trim()) {
-                                addExercise(workout.workoutType, {
-                                    date:dateInput.value,
-                                    name: nameInput.value.trim(),
-                                    sets: parseInt(setsInput.value) || 0,
-                                    reps: parseInt(repsInput.value) || 0,
-                                    weight: parseFloat(weightInput.value) || 0,
-                                });
-                                form.reset();
-                            }
+                            const newExercise = {
+                                date: dateInput.value,
+                                name: nameInput.value.trim(),
+                                sets: parseInt(setsInput.value) || 0,
+                                reps: parseInt(repsInput.value) || 0,
+                                weight: parseFloat(weightInput.value) || 0,
+                            };
+
+                            handleAddExercise(workout.workoutType, newExercise);
+                            form.reset();
                         }}
                         className="space-y-2"
                     >
-                         
-                         <input
+                        <input
                             type="date"
                             name="date"
                             defaultValue={formData.date}
-                            placeholder="Exercise name"
                             className="hidden"
                         />
-                        
                         <input
                             type="text"
                             name="name"
@@ -201,7 +236,6 @@ export default function ExerciseList({
                         >
                             Add Exercise
                         </button>
-                        
                     </form>
                 </div>
             ))}

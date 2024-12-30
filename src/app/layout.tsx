@@ -1,5 +1,10 @@
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "./api/uploadthing/core";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -11,6 +16,11 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+async function UTSSR() {
+  await connection(); 
+  return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+}
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -27,6 +37,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Suspense>
+        <UTSSR />
+      </Suspense>
+
         {children}
       </body>
     </html>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import WorkoutSelectionForm from './WorkoutSelectionForm';
 import ExerciseList from './ExerciseList';
 import { useRouter } from 'next/navigation';
@@ -36,6 +36,12 @@ export default function AddPlanForm() {
   const [shows,setShows] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+    if (!isLoggedIn) {
+      router.push("/login");
+    }
+  }, []);
  
   const handleFormSubmit = (data: Inputs) => {
     setFormData(data);
